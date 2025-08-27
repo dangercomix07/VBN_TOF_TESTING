@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "vl53lx_api.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +46,9 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+VL53LX_Dev_t vl53lx_dev;
+VL53LX_MultiRangingData_t vl53lx_data;
+VL53LX_Error vl53lx_status;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,7 +62,11 @@ static void MX_I2C1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int __io_putchar(int ch)
+{
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+  return ch;
+}
 /* USER CODE END 0 */
 
 /**
@@ -94,21 +101,30 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-
+  vl53lx_dev.i2c_slave_address = 0x52;
+  vl53lx_dev.comms_speed_khz = 400;
+  vl53lx_dev.comms_type = 1;
+  vl53lx_status = VL53LX_WaitDeviceBooted(&vl53lx_dev);
+  vl53lx_status = VL53LX_DataInit(&vl53lx_dev);
+  vl53lx_status = VL53LX_StartMeasurement(&vl53lx_dev);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
-  {
-    /* USER CODE END WHILE */
+    {
+      /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
-}
+      /* USER CODE BEGIN 3 */
+        VL53LX_WaitMeasurementDataReady(&vl53lx_dev);
+        VL53LX_GetMultiRangingData(&vl53lx_dev, &vl53lx_data);
+        printf("Distance: %d mm\r\n", vl53lx_data.RangeData[0].RangeMilliMeter);
+        VL53LX_ClearInterruptAndStartMeasurement(&vl53lx_dev);
+        HAL_Delay(100);
+      }
+    /* USER CODE END 3 */
 
-/**
+  /**
   * @brief System Clock Configuration
   * @retval None
   */
