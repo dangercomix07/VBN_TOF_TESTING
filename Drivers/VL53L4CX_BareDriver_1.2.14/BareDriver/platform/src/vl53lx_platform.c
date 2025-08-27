@@ -21,6 +21,9 @@
 
 #include "vl53lx_platform.h"
 #include <vl53lx_platform_log.h>
+#include "main.h"
+
+extern I2C_HandleTypeDef hi2c1;
 
 
 
@@ -36,48 +39,56 @@
 
 
 VL53LX_Error VL53LX_CommsInitialise(
-	VL53LX_Dev_t *pdev,
-	uint8_t       comms_type,
-	uint16_t      comms_speed_khz)
+        VL53LX_Dev_t *pdev,
+        uint8_t       comms_type,
+        uint16_t      comms_speed_khz)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        VL53LX_Error status = VL53LX_ERROR_NONE;
+        pdev->comms_type = comms_type;
+        pdev->comms_speed_khz = comms_speed_khz;
+        return status;
 
 }
 
 
 VL53LX_Error VL53LX_CommsClose(
-	VL53LX_Dev_t *pdev)
+        VL53LX_Dev_t *pdev)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        VL53LX_Error status = VL53LX_ERROR_NONE;
+        return status;
 }
 
 
 
 VL53LX_Error VL53LX_WriteMulti(
-	VL53LX_Dev_t *pdev,
-	uint16_t      index,
-	uint8_t      *pdata,
-	uint32_t      count)
+        VL53LX_Dev_t *pdev,
+        uint16_t      index,
+        uint8_t      *pdata,
+        uint32_t      count)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        VL53LX_Error status = VL53LX_ERROR_NONE;
+        if (HAL_I2C_Mem_Write(&hi2c1, pdev->i2c_slave_address, index,
+                              I2C_MEMADD_SIZE_16BIT, pdata, count,
+                              HAL_MAX_DELAY) != HAL_OK) {
+                status = VL53LX_ERROR_CONTROL_INTERFACE;
+        }
+        return status;
 }
 
 
 VL53LX_Error VL53LX_ReadMulti(
-	VL53LX_Dev_t *pdev,
-	uint16_t      index,
-	uint8_t      *pdata,
-	uint32_t      count)
+        VL53LX_Dev_t *pdev,
+        uint16_t      index,
+        uint8_t      *pdata,
+        uint32_t      count)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        VL53LX_Error status = VL53LX_ERROR_NONE;
+        if (HAL_I2C_Mem_Read(&hi2c1, pdev->i2c_slave_address, index,
+                             I2C_MEMADD_SIZE_16BIT, pdata, count,
+                             HAL_MAX_DELAY) != HAL_OK) {
+                status = VL53LX_ERROR_CONTROL_INTERFACE;
+        }
+        return status;
 }
 
 
@@ -194,39 +205,45 @@ VL53LX_Error VL53LX_RdDWord(
 
 
 VL53LX_Error VL53LX_WaitUs(
-	VL53LX_Dev_t *pdev,
-	int32_t       wait_us)
+        VL53LX_Dev_t *pdev,
+        int32_t       wait_us)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        VL53LX_Error status = VL53LX_ERROR_NONE;
+        (void)pdev;
+        uint32_t count = (SystemCoreClock / 1000000) * (uint32_t)wait_us / 5U;
+        while (count--)
+        {
+                __NOP();
+        }
+        return status;
 }
 
 
 VL53LX_Error VL53LX_WaitMs(
-	VL53LX_Dev_t *pdev,
-	int32_t       wait_ms)
+        VL53LX_Dev_t *pdev,
+        int32_t       wait_ms)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        VL53LX_Error status = VL53LX_ERROR_NONE;
+        (void)pdev;
+        HAL_Delay(wait_ms);
+        return status;
 }
 
 
 
 VL53LX_Error VL53LX_GetTimerFrequency(int32_t *ptimer_freq_hz)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        VL53LX_Error status = VL53LX_ERROR_NONE;
+        *ptimer_freq_hz = 1000;
+        return status;
 }
 
 
 VL53LX_Error VL53LX_GetTimerValue(int32_t *ptimer_count)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        VL53LX_Error status = VL53LX_ERROR_NONE;
+        *ptimer_count = (int32_t)HAL_GetTick();
+        return status;
 }
 
 
@@ -234,89 +251,77 @@ VL53LX_Error VL53LX_GetTimerValue(int32_t *ptimer_count)
 
 VL53LX_Error VL53LX_GpioSetMode(uint8_t pin, uint8_t mode)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        (void)pin;
+        (void)mode;
+        return VL53LX_ERROR_NONE;
 }
 
 
 VL53LX_Error  VL53LX_GpioSetValue(uint8_t pin, uint8_t value)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        (void)pin;
+        (void)value;
+        return VL53LX_ERROR_NONE;
 
 }
 
 
 VL53LX_Error  VL53LX_GpioGetValue(uint8_t pin, uint8_t *pvalue)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        (void)pin;
+        *pvalue = 0;
+        return VL53LX_ERROR_NONE;
 }
 
 
 
 VL53LX_Error  VL53LX_GpioXshutdown(uint8_t value)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        (void)value;
+        return VL53LX_ERROR_NONE;
 }
 
 
 VL53LX_Error  VL53LX_GpioCommsSelect(uint8_t value)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        (void)value;
+        return VL53LX_ERROR_NONE;
 }
 
 
 VL53LX_Error  VL53LX_GpioPowerEnable(uint8_t value)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        (void)value;
+        return VL53LX_ERROR_NONE;
 }
 
 
 VL53LX_Error  VL53LX_GpioInterruptEnable(void (*function)(void), uint8_t edge_type)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        (void)function;
+        (void)edge_type;
+        return VL53LX_ERROR_NONE;
 }
 
 
 VL53LX_Error  VL53LX_GpioInterruptDisable(void)
 {
-	VL53LX_Error status = 255;
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	return status;
+        return VL53LX_ERROR_NONE;
 }
 
 
 VL53LX_Error VL53LX_GetTickCount(
-		VL53LX_Dev_t *pdev,
-		uint32_t *ptick_count_ms)
+                VL53LX_Dev_t *pdev,
+                uint32_t *ptick_count_ms)
 {
-
-
-
-	VL53LX_Error status = 255;
-	(void) pdev;
-
-	
-	/* To be filled by customer according to the platform request. Return 0 if OK */
-	/* example: *ptick_count_ms = timeGetTime();   */
-	trace_print(
-	VL53LX_TRACE_LEVEL_DEBUG,
-	"VL53LX_GetTickCount() = %5u ms;\n",
-	*ptick_count_ms);
-
-	return status;
+        VL53LX_Error status = VL53LX_ERROR_NONE;
+        (void)pdev;
+        *ptick_count_ms = HAL_GetTick();
+        trace_print(
+        VL53LX_TRACE_LEVEL_DEBUG,
+        "VL53LX_GetTickCount() = %5u ms;\n",
+        *ptick_count_ms);
+        return status;
 
 }
 
